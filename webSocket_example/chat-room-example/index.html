@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+    }
+    #msgList {
+      width: 400px;
+      height: 400px;
+      background: #eee;
+    }
+    #chatGroup {
+      width: 400px;
+      height: 100px;
+      background: #089e8a;
+    }
+    .avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      /* background: yellow; */
+    }
+    .avatar,
+    #msgInput,
+    #msgSend {
+      display: inline-block;
+      height: 40px;
+      line-height: 40px;
+      vertical-align: top;
+      box-sizing: border-box;
+    }
+    #msgInput {
+      width: 200px;
+      background: #fff;
+    }
+    #msgSend {
+      border: none;
+      outline: none;
+      width: 80px;
+      background: #95c7ce;
+      color: #fff;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <ul id="msgList"></ul>
+  <div id="chatGroup">
+    <div class="avatar"></div>
+    <input type="text" id="msgInput">
+    <button id="msgSend">发送</button>
+  </div>
+</body>
+<script>
+  let msgList = document.getElementById('msgList');
+  let msgAvatar = document.getElementsByClassName('avatar')[0];
+  let msgInput = document.getElementById('msgInput');
+  let msgSend = document.getElementById('msgSend');
+  // 头像颜色随机
+  const randomAvatar = () => {
+    let str = Math.floor(Math.random() * 0xffffff).toString(16);
+    if (str.length === 5) {
+      str = '0' + str;
+    }
+    return `#${str}`;
+  }
+  // 用户名称随机
+  const randomNick = () => {
+    let str = 'abcdefghijklmnopqrstuvwxyz';
+    let a = Math.floor(Math.random() * 26),
+      b = Math.floor(Math.random() * 26),
+      c = Math.floor(Math.random() * 26);
+    return `${str[a]}${str[b]}${str[c]}`;
+  }
+  // 初始化
+  const init = () => {
+    let color = randomAvatar();
+    msgAvatar.style.background = color;
+  }
+  // 创建 li 结构
+  // websocket连接封装函数
+  init();
+</script>
+</html>
