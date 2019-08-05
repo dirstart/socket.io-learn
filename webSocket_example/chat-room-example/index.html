@@ -10,15 +10,23 @@
       margin: 0;
       padding: 0;
     }
+    #wrapper {
+      margin: 20px auto;
+      width: 400px;
+    }
     #msgList {
       width: 400px;
       height: 400px;
       background: #eee;
     }
     #chatGroup {
+      /* text-align: center; */
       width: 400px;
       height: 100px;
       background: #089e8a;
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
     }
     .avatar {
       width: 40px;
@@ -29,7 +37,6 @@
     .avatar,
     #msgInput,
     #msgSend {
-      display: inline-block;
       height: 40px;
       line-height: 40px;
       vertical-align: top;
@@ -47,20 +54,37 @@
       color: #fff;
       cursor: pointer;
     }
+    #msgSend:hover {
+      background: #002311;
+    }
+    #msgUser {
+      color: #fff;
+      width: 50px;
+      height: 30px;
+      border-radius: 3px;
+      background: #293033;
+      text-align: center;
+      line-height: 30px;
+    }
   </style>
 </head>
 <body>
-  <ul id="msgList"></ul>
-  <div id="chatGroup">
-    <div class="avatar"></div>
-    <input type="text" id="msgInput">
-    <button id="msgSend">发送</button>
+  <div id="wrapper">
+      <ul id="msgList"></ul>
+      <div id="chatGroup">
+        <div class="avatar"></div>
+        <label for="msgInput" id="msgUser">nickName</label>
+        <input type="text" id="msgInput">
+        <button id="msgSend">发送</button>
+      </div>
   </div>
 </body>
 <script>
+  const ws = new WebSocket("ws://localhost:8080");
   let msgList = document.getElementById('msgList');
   let msgAvatar = document.getElementsByClassName('avatar')[0];
   let msgInput = document.getElementById('msgInput');
+  let msgUser = document.getElementById('msgUser');
   let msgSend = document.getElementById('msgSend');
   // 头像颜色随机
   const randomAvatar = () => {
@@ -78,13 +102,16 @@
       c = Math.floor(Math.random() * 26);
     return `${str[a]}${str[b]}${str[c]}`;
   }
+  // websocket连接封装函数
+  const wsSend = () => {
+    
+  }
   // 初始化
   const init = () => {
-    let color = randomAvatar();
-    msgAvatar.style.background = color;
+    msgAvatar.style.background = randomAvatar();
+    msgUser.innerText = randomNick();
   }
   // 创建 li 结构
-  // websocket连接封装函数
   init();
 </script>
 </html>
