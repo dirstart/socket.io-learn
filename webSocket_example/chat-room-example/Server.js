@@ -1,67 +1,65 @@
-let WebSocketServer = require('ws').Server;
+/**
+ * Problem
+ * 1.浏览器刷新的时候不代表 client 退出？
+ */
+let wsUtil = require('ws');
+let WebSocketServer = wsUtil.Server;
 let uuid = require('node-uuid');
 let wsServer = new WebSocketServer({
   port: 8080
 });
 let clientIndex = 0;
 let clients = [];
-// 服务端发送信息
-const socketSend = (type, client_uuid, nickname, message) => {
-  for (var i = 0; i < clients.length; i++) {
-      var clientSocket = clients[i].ws;
-      if (clientSocket.readyState === wsServer.OPEN) {
-          clientSocket.send(JSON.stringify({
-              "type": type,
-              "id": client_uuid,
-              "nickname": nickname,
-              "message": message
-          }));
+// 服务器传递信息封装的函数
+const socketSend = (type, message, nickname) => {
+  let len = clients.length;
+  for (let i = 0; i < len; i++) {
+    let clientSocket = clients[i].ws;
+    if (clientSocket.readyState === wsUtil.OPEN) {
+      let obj = { type, message };
+      // 上线和下线只需要 type 和 message 就够了
+      if (type !== 'message') {
+        obj.userCount = len;
+      } else {
+        obj.nickname = nickname;
       }
+      clientSocket.send(JSON.stringify(obj));
+    }
   }
 }
 // 服务器处理链接关闭
-const closeSocket = (customMessage) => {
-  for (var i = 0; i < clients.length; i++) {
-      if (clients[i].id == client_uuid) {
-          var disconnect_message;
-          if (customMessage) {
-              disconnect_message = customMessage;
-          } else {
-              disconnect_message = nickname + " has disconnected";
-          }
-          socketSend("notification", client_uuid, nickname, disconnect_message);
-          clients.splice(i, 1);
-      }
+const closeSocket = (nickname, clientId, userDownMsg) => {
+  userDownMsg = nickname + userDownMsg || '下线了！';
+  for (let i = 0 ; i < clients.length; i++) {
+    if (clients[i].id === clientId) {
+      clients.splice(i, 1);
+      break;
+    }
   }
+  socketSend('userDown', userDownMsg);
 };
 // 服务端处理链接
-// todo - 这里看下能不能通过客户端传过来
 wsServer.on('connection', function(ws) {
   var client_uuid = uuid.v4();
-  var nickname = "AnonymousUser" + clientIndex;
+  var nickname = "夏目美绪" + clientIndex;
+  let currentUser = '';
   clientIndex += 1;
   clients.push({ "id": client_uuid, "ws": ws, "nickname": nickname });
   console.log('client [%s] connected', client_uuid);
-  console.log('当前的用户们个数:', clients.length);
+  clients.forEach(item => currentUser += `[${item.nickname}]`);
+  console.log('当前的用户们个数:', clients.length, currentUser);
   var connect_message = nickname + " has connected";
-  socketSend("notification", client_uuid, nickname, connect_message);
-});
-// 监听客户端传来的东西
-wsServer.on('message', function(message) {
-  // if (message.indexOf('/nick') === 0) {
-  //     var nickname_array = message.split(' ');
-  //     if (nickname_array.length >= 2) {
-  //         var old_nickname = nickname;
-  //         nickname = nickname_array[1];
-  //         var nickname_message = "Client " + old_nickname + " changed to " + nickname;
-  //         socketSend("nick_update", client_uuid, nickname, nickname_message);
-  //     }
-  // } else {
-  socketSend("message", client_uuid, nickname, message);
-  // }
-});
-wsServer.on('close', function () {
-  console.log('有个用户退出了链接');
-  closeSocket();
-});
+  socketSend("userUp", connect_message);
 
+  // 监听客户端传来的东西
+  ws.on('message', function(message) {
+    console.log(`客户端[${nickname}]传过来了`, message);
+    socketSend('message', message, nickname);
+  });
+
+  // ws退出
+  ws.on('close', function () {
+    console.log(`用户${nickname}退出了链接！`);
+    closeSocket(nickname, client_uuid);
+  });
+});

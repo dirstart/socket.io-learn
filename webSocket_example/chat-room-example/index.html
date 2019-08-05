@@ -20,7 +20,7 @@
       background: #eee;
     }
     #chatGroup {
-      /* text-align: center; */
+      position: relative;
       width: 400px;
       height: 100px;
       background: #089e8a;
@@ -66,6 +66,18 @@
       text-align: center;
       line-height: 30px;
     }
+    .count-wrap {
+      position: absolute;
+      bottom: 4px;
+      right: 10px;
+    }
+    #msgTip {
+      position: absolute;
+      background: #95c1c1;
+      top: 3px;
+      border-radius: 2px;
+      opacity: 0;
+    }
   </style>
 </head>
 <body>
@@ -76,6 +88,8 @@
         <label for="msgInput" id="msgUser">nickName</label>
         <input type="text" id="msgInput">
         <button id="msgSend">发送</button>
+        <div class="count-wrap">当前在线人数：<span id="onlineCount"></span>个</div>
+        <div id="msgTip">123</div>
       </div>
   </div>
 </body>
@@ -86,6 +100,8 @@
   let msgInput = document.getElementById('msgInput');
   let msgUser = document.getElementById('msgUser');
   let msgSend = document.getElementById('msgSend');
+  let msgTip = document.getElementById('msgTip');
+  let msgCount = document.getElementById('onlineCount');
   // 头像颜色随机
   const randomAvatar = () => {
     let str = Math.floor(Math.random() * 0xffffff).toString(16);
@@ -102,16 +118,76 @@
       c = Math.floor(Math.random() * 26);
     return `${str[a]}${str[b]}${str[c]}`;
   }
-  // websocket连接封装函数
-  const wsSend = () => {
+  // 更改用户数目
+  const showCount = (count) => {
+    msgCount.innerText = count;
+  }
+  // 用户登出登入信息
+  const showTip = (msg, count) => {
+    msgTip.innerText = msg;
+    msgTip.style.opacity = 1;
+    count = count || 20;
+    let timer;
+    const change = count => {
+      console.log('count', count);
+      if (count < 0) {
+        clearTimeout(timer);
+        return;
+      }
+      timer = setTimeout(function () {
+        count--;
+        msgTip.style.opacity -= 0.05;
+        change(count);
+      }, 200);
+    }
+    change(count);
+  }
+  // 用户发送
+  const sendMsg = () => {
+    let str = msgInput.value;
+    str = str.toString().trim();
+    ws.send(str);
+    msgInput.value = '';
+    msgInput.focus();
+  }
+  // 用户接收
+  const listAdd = (user, msg) => {
     
+  }
+  // ws相关函数
+  ws.onopen = function (e) {
+    console.log('打开了socket客户端');
+    // 向服务端发送我的名字
+    if (typeof e === 'string') {
+      ws.send(e);
+    }
+  }
+  ws.onclose = function () {
+    console.log('关闭了socket客户端');
+  }
+  ws.onmessage = function (socket) {
+    let data = socket.data;
+    data = JSON.parse(data);
+    console.log('远方传来的家书', data);
+    // 如果是 notification，说明有人上下线了
+    if (data.type === 'userUp' || data.type === 'userDown') {
+      showTip(data.message);
+      showCount(data.userCount || 0);
+    } else if (data.type === 'message') {
+    }
   }
   // 初始化
   const init = () => {
     msgAvatar.style.background = randomAvatar();
     msgUser.innerText = randomNick();
+    msgSend.onclick = sendMsg;
+    msgInput.onkeydown = function (e) {
+      e = e || window.event;
+      if (e.keyCode === 13) {
+        sendMsg();
+      }
+    }
   }
-  // 创建 li 结构
   init();
 </script>
 </html>

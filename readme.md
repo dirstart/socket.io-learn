@@ -1,5 +1,12 @@
 本代码旨在模仿饿了吗多人分享填写订单功能
 
+#### 需要特别考虑的几点
+
+多人分享订单问题
+* 1.每个用户登录的时候，服务器怎么知道是哪个用户登录的呢？socket的clients的每个nickName是怎么来的
+
+* 2.需要考虑每个用户的 readyState 状态;当屏幕关闭、唤醒，要注意这个时候的变化。
+
 #### 模仿对象截图
 https://raw.githubusercontent.com/dirstart/image_bed/master/socket.io0.png
 https://raw.githubusercontent.com/dirstart/image_bed/master/socket.io1.png
@@ -19,3 +26,4 @@ https://raw.githubusercontent.com/dirstart/image_bed/master/socket.io8.png
 * https://socket.io
 
 #### 实现方案二 websocket
+
