@@ -3,6 +3,7 @@
  * 1.浏览器刷新的时候不代表 client 退出？
  */
 const wsUtil = require('ws')
+const qs = require('querystring')
 const WebSocketServer = wsUtil.Server
 const uuid = require('node-uuid')
 const wsServer = new WebSocketServer({
@@ -10,8 +11,8 @@ const wsServer = new WebSocketServer({
 })
 let clientIndex = 0
 const clients = []
-// 服务器传递信息封装的函数
-const socketSend = (type, message, nickname) => {
+// 服务器传递信息封装的函数 - 这里关于用户的信息最好用对象来表示
+const socketSend = (type, message, nickName, color) => {
   const len = clients.length
 
   for (let i = 0; i < len; i++) {
@@ -25,15 +26,16 @@ const socketSend = (type, message, nickname) => {
       if (type !== 'message') {
         obj.userCount = len
       } else {
-        obj.nickname = nickname
+        obj.nickName = nickName
+        obj.color = color
       }
       clientSocket.send(JSON.stringify(obj))
     }
   }
 }
 // 服务器处理链接关闭
-const closeSocket = (nickname, clientId, userDownMsg) => {
-  userDownMsg = nickname + userDownMsg || '下线了！'
+const closeSocket = (nickName, clientId, userDownMsg) => {
+  userDownMsg = nickName + userDownMsg || '下线了！'
   for (let i = 0; i < clients.length; i++) {
     if (clients[i].id === clientId) {
       clients.splice(i, 1)
@@ -44,33 +46,37 @@ const closeSocket = (nickname, clientId, userDownMsg) => {
 }
 // 服务端处理链接
 
-wsServer.on('connection', (ws) => {
+wsServer.on('connection', (ws, req) => {
+  // 获取传过来的用户名
+  const url = req['url']
+  const paramObj = qs.parse(url.split('?')[1])
+  const nickName = paramObj['nick']
+  const color = paramObj['color']
   const clientUuid = uuid.v4()
-  const nickname = `夏目美绪${clientIndex}`
   let currentUser = ''
 
   clientIndex += 1
   clients.push({ id: clientUuid,
     ws,
-    nickname })
+    nickName })
   console.log('client [%s] connected', clientUuid)
   clients.forEach((item) => {
-    currentUser += `[${item.nickname}]`
+    currentUser += `[${item.nickName}]`
   })
   console.log('当前的用户们个数:', clients.length, currentUser)
-  const connectMessage = `${nickname} has connected`
+  const connectMessage = `${nickName} has connected`
 
   socketSend('userUp', connectMessage)
 
   // 监听客户端传来的东西
   ws.on('message', (message) => {
-    console.log(`客户端[${nickname}]传过来了`, message)
-    socketSend('message', message, nickname)
+    console.log(`客户端[${nickName}]传过来了`, message)
+    socketSend('message', message, nickName, color)
   })
 
   // Ws退出
   ws.on('close', () => {
-    console.log(`用户${nickname}退出了链接！`)
-    closeSocket(nickname, clientUuid)
+    console.log(`用户${nickName}退出了链接！`)
+    closeSocket(nickName, clientUuid)
   })
 })

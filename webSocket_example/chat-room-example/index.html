@@ -10,6 +10,9 @@
       margin: 0;
       padding: 0;
     }
+    ul, li {
+      list-style: none;
+    }
     #wrapper {
       margin: 20px auto;
       width: 400px;
@@ -57,7 +60,8 @@
     #msgSend:hover {
       background: #002311;
     }
-    #msgUser {
+    #msgUser,
+    .item-name {
       color: #fff;
       width: 50px;
       height: 30px;
@@ -78,6 +82,27 @@
       border-radius: 2px;
       opacity: 0;
     }
+    .msg-item {
+      margin-bottom: 3px;
+      background: #909432;
+      height: 40px;
+      line-height: 40px;
+    }
+    .item-name,
+    .item-icon,
+    .item-text {
+      display: inline-block;
+      margin-right: 10px;
+      line-height: 30px;
+      vertical-align: middle;
+      height: 30px;
+    }
+    .item-icon {
+      margin-left: 10px;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+    }
   </style>
 </head>
 <body>
@@ -94,7 +119,6 @@
   </div>
 </body>
 <script>
-  const ws = new WebSocket("ws://localhost:8080");
   let msgList = document.getElementById('msgList');
   let msgAvatar = document.getElementsByClassName('avatar')[0];
   let msgInput = document.getElementById('msgInput');
@@ -142,44 +166,68 @@
     }
     change(count);
   }
-  // 用户发送
-  const sendMsg = () => {
-    let str = msgInput.value;
-    str = str.toString().trim();
-    ws.send(str);
-    msgInput.value = '';
-    msgInput.focus();
-  }
   // 用户接收
-  const listAdd = (user, msg) => {
-    // todo
-  }
-  // ws相关函数
-  ws.onopen = function (e) {
-    console.log('打开了socket客户端');
-    // 向服务端发送我的名字
-    if (typeof e === 'string') {
-      ws.send(e);
-    }
-  }
-  ws.onclose = function () {
-    console.log('关闭了socket客户端');
-  }
-  ws.onmessage = function (socket) {
-    let data = socket.data;
-    data = JSON.parse(data);
-    console.log('远方传来的家书', data);
-    // 如果是 notification，说明有人上下线了
-    if (data.type === 'userUp' || data.type === 'userDown') {
-      showTip(data.message);
-      showCount(data.userCount || 0);
-    } else if (data.type === 'message') {
-    }
-  }
+  const appendLog = (user, msg, color) => {
+    let oFrag = document.createDocumentFragment();
+    let oLi = document.createElement('li');
+    oLi.className = 'msg-item';
+    let oAvatar = document.createElement('span');
+    oAvatar.className = 'item-icon';
+    oAvatar.style.background = color;
+    let oName = document.createElement('span');
+    oName.className = 'item-name';
+    oName.innerText = user;
+    let oMsg = document.createElement('span');
+    oMsg.className = 'item-text';
+    oMsg.innerText = msg;
+    oLi.appendChild(oAvatar);
+    oLi.appendChild(oName);
+    oLi.appendChild(oMsg);
+    oFrag.appendChild(oLi);
+    msgList.appendChild(oFrag);
+  };
   // 初始化
   const init = () => {
     msgAvatar.style.background = randomAvatar();
     msgUser.innerText = randomNick();
+    // ws带上用户的昵称
+    const nick = msgUser.innerText;
+    const color = msgAvatar.style.background;
+    console.log('color', color);
+    const ws = new WebSocket(`ws://127.0.0.1:8080?nick=${nick}&color=${color}`);
+    // ws相关初始化
+    ws.onopen = function (e) {
+      console.log('打开了socket客户端');
+      // 向服务端发送我的名字
+      if (typeof e === 'string') {
+        ws.send(e);
+      }
+    }
+    ws.onclose = function () {
+      console.log('关闭了socket客户端');
+    }
+    ws.onmessage = function (socket) {
+      let data = socket.data;
+      data = JSON.parse(data);
+      console.log('远方传来的家书', data);
+      // 如果是 notification，说明有人上下线了
+      if (data.type === 'userUp' || data.type === 'userDown') {
+        showTip(data.message);
+        showCount(data.userCount || 0);
+      } else if (data.type === 'message') {
+        const {nickName, message, color} = data;
+        appendLog(nickName, message, color);
+      }
+    }
+    // 定义发送函数
+    const sendMsg = () => {
+      let str = msgInput.value;
+      str = str.toString().trim();
+      ws.send(str);
+      msgInput.value = '';
+      msgInput.focus();
+    }
+    // 绑定 dom 结构
     msgSend.onclick = sendMsg;
     msgInput.onkeydown = function (e) {
       e = e || window.event;
