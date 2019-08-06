@@ -8,15 +8,15 @@
 * 2.需要考虑每个用户的 readyState 状态;当屏幕关闭、唤醒，要注意这个时候的变化。
 
 #### 模仿对象截图
-https://raw.githubusercontent.com/dirstart/image_bed/master/socket.io0.png
-https://raw.githubusercontent.com/dirstart/image_bed/master/socket.io1.png
-https://raw.githubusercontent.com/dirstart/image_bed/master/socket.io2.png
-https://raw.githubusercontent.com/dirstart/image_bed/master/socket.io3.png
-https://raw.githubusercontent.com/dirstart/image_bed/master/socket.io4.png
-https://raw.githubusercontent.com/dirstart/image_bed/master/socket.io5.png
-https://raw.githubusercontent.com/dirstart/image_bed/master/socket.io6.png
-https://raw.githubusercontent.com/dirstart/image_bed/master/socket.io7.png
-https://raw.githubusercontent.com/dirstart/image_bed/master/socket.io8.png
+![](https://raw.githubusercontent.com/dirstart/image_bed/master/socket.io0.png)
+![](https://raw.githubusercontent.com/dirstart/image_bed/master/socket.io1.png)
+![](https://raw.githubusercontent.com/dirstart/image_bed/master/socket.io2.png)
+![](https://raw.githubusercontent.com/dirstart/image_bed/master/socket.io3.png)
+![](https://raw.githubusercontent.com/dirstart/image_bed/master/socket.io4.png)
+![](https://raw.githubusercontent.com/dirstart/image_bed/master/socket.io5.png)
+![](https://raw.githubusercontent.com/dirstart/image_bed/master/socket.io6.png)
+![](https://raw.githubusercontent.com/dirstart/image_bed/master/socket.io7.png)
+![](https://raw.githubusercontent.com/dirstart/image_bed/master/socket.io8.png)
 
 #### 实现方案一 socket.io
 

@@ -5,7 +5,7 @@
   "main": "demo.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "lint": "eslint * --fix"
+    "lint": "eslint --fix --ext .js webSocket_example"
   },
   "author": "",
   "license": "ISC",
@@ -15,6 +15,12 @@
   },
   "devDependencies": {
     "eslint": "^6.1.0",
+    "eslint-config-airbnb-base": "^13.2.0",
+    "eslint-config-standard": "^13.0.1",
+    "eslint-plugin-import": "^2.18.2",
+    "eslint-plugin-node": "^9.1.0",
+    "eslint-plugin-promise": "^4.2.1",
+    "eslint-plugin-standard": "^4.0.0",
     "eslint-plugin-vue": "^5.2.3",
     "express": "^4.17.1",
     "node-uuid": "^1.4.8",
